@@ -11,16 +11,16 @@ var io = require('socket.io').listen(server);
 
 var images = ['test.png'];
 var sockets = [];
-var intervalID;
+var checkCompletionInterval;
 
 watch('public/images', function(filename) {
   console.log(filename, ' changed.');
   var newImg =findNewImageName();
   if (newImg) {
 
-    if (intervalID) clearInterval(intervalID);
+    if (checkCompletionInterval) clearInterval(checkCompletionInterval);
 
-    intervalID = setInterval(sendImgToClients, 500, newImg);
+    checkCompletionInterval = setInterval(sendImgToClients, 500, newImg);
   } 
 });
 
@@ -54,6 +54,7 @@ function logExistingImages() {
   for (var i = 0; i < files.length; i++) {
     images.push(files[i]);
   }
+
 }
 
 function sendImgToClients(newImg) {
@@ -61,6 +62,8 @@ function sendImgToClients(newImg) {
        sockets[i].emit('newImage', {newImage : "/images/" + newImg});
     }
     images.push(newImg);
+
+    clearInterval(checkCompletionInterval);
 }
 
 // When we get a connection from the browser
