@@ -55,9 +55,9 @@ function logExistingImages() {
   }
 }
 
-function sendImgToClients(pathToImg) {
+function sendImgToClients(newImg) {
   for (var i = 0; i < sockets.length; i++) {
-       sockets[i].emit('newImage', {newImage : pathToImg});
+       sockets[i].emit('newImage', {newImage : "/images/" + newImg});
     }
     images.push(newImg);
 }
