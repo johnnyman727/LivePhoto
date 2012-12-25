@@ -1,5 +1,4 @@
 var fs = require('fs');
-var lsof = require('lsof');
 var http = require('http');
 var express = require('express'),
  app = express();
@@ -17,9 +16,6 @@ var intervalID;
 watch('public/images', function(filename) {
   console.log(filename, ' changed.');
   var newImg =findNewImageName();
-  lsof.raw(function(data) {
-    console.log(data);
-  });
   if (newImg) {
     clearInterval(intervalID);
 
