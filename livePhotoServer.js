@@ -25,7 +25,7 @@ watch('public/images', function(filename) {
 
 app.get('/', function(req, res) {
       console.log("Somebody has hit the server here!");
-     fs.readFile(__dirname + '/livePhoto.html', 'utf8', function(err, text){
+      fs.readFile(__dirname + '/livePhoto.html', 'utf8', function(err, text){
        res.send(text);
    });
 })
