@@ -1,4 +1,5 @@
 var fs = require('fs');
+var lsof = require('lsof');
 var http = require('http');
 var express = require('express'),
  app = express();
@@ -15,6 +16,9 @@ var sockets = [];
 watch('public/images', function(filename) {
   console.log(filename, ' changed.');
   var newImg =findNewImageName();
+  lsof.raw(function(data) {
+    console.log(data);
+  });
   if (newImg) {
     for (var i = 0; i < sockets.length; i++) {
   	   sockets[i].emit('newImage', {newImage : "/images/" +newImg});
