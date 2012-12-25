@@ -17,7 +17,7 @@ watch('public/images', function(filename) {
   var newImg =findNewImageName();
   if (newImg) {
     for (var i = 0; i < sockets.length; i++) {
-  	   sockets[i].emit('newImage', {newImage : "images/" +newImg});
+  	   sockets[i].emit('newImage', {newImage : "jonamckay.com:8080/images/" +newImg});
     }
   	images.push(newImg);
   } 
