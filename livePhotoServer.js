@@ -17,9 +17,10 @@ watch('public/images', function(filename) {
   console.log(filename, ' changed.');
   var newImg =findNewImageName();
   if (newImg) {
-    clearInterval(intervalID);
 
-    intervalID = setInterval(sendImgToClients, 500, "/image/" + newImg);
+    if (intervalID) clearInterval(intervalID);
+
+    intervalID = setInterval(sendImgToClients, 500, newImg);
   } 
 });
 
