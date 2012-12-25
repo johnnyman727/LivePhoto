@@ -58,8 +58,6 @@ function logExistingImages() {
 // When we get a connection from the browser
 io.sockets.on('connection', function (socket) {
 
-  console.log("We have a new connection!");
-
   // If there is a socket
   if (socket) {
 
