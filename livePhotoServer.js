@@ -43,7 +43,7 @@ watch('public/images', function(filename) {
   // If we do have a new image (and it was just deleted or something)
   if (newImg) {
 
-    // Print out it's name to the terminal
+    // Print out its name to the terminal
     console.log("New Image Name: " + newImg);
 
     // If we have an interval going, cancel it
@@ -137,7 +137,7 @@ function logExistingImages() {
   // Grab all the current images
     var files = fs.readdirSync('public/images');
 
-    // For each file in teh directory
+    // For each file in the directory
     for (var i = 0; i < files.length; i++) {
 
       // Add it to the array

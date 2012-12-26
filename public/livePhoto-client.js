@@ -4,7 +4,7 @@ var browser_socket = io.connect('jonamckay.com:8080');
 
 // When we get a new image message
 browser_socket.on('newImage', function (data) {
-
+	
 	// Change the source attribute of the image in 
 	// our client html to the new image url
    	$('#live-photo').attr('src', data.newImage);
