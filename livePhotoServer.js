@@ -29,7 +29,7 @@ var images = [];
 var watch = require('node-watch');
 
 // An interval to make sure we don't send out the link prior to upload completion
-var intervalID;
+var checkCompletionInterval;
 
 /*
 * Start watching the image directory for changes.
