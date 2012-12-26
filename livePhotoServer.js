@@ -1,72 +1,95 @@
-var fs = require('fs');
+// Include the http module (built-in to NodeJS)
 var http = require('http');
+
+// Include Express to pick up web requests
 var express = require('express'),
- app = express();
-var watch = require('node-watch');
-app.set('views', __dirname + '/views');
+
+// Start Express up
+app = express();
+
+// Create a new server using our express app
+var server = http.createServer(app);
+
 //set path to static files
 app.use(express.static(__dirname + '/public'));
-var server = http.createServer(app);
+
+// Include File System Module
+var fs = require('fs');
+
+// Start a new websocket on the server's address
 var io = require('socket.io').listen(server);
 
-var images = ['test.png'];
+// Create an array to store open socket connections with
 var sockets = [];
-var checkCompletionInterval;
 
+// Create an array to store the name of images we've already displayed
+var images = [];
+
+// Import the directory watching module
+var watch = require('node-watch');
+
+// An interval to make sure we don't send out the link prior to upload completion
+var intervalID;
+
+/*
+* Start watching the image directory for changes.
+* When we detect a change, notify the clients
+*/
 watch('public/images', function(filename) {
-  console.log(filename, ' changed.');
-  var newImg =findNewImageName();
+
+  // Find the new image that triggered this
+  var newImg = findNewImageName();
+
+  // If we do have a new image (and it was just deleted or something)
   if (newImg) {
 
-    if (checkCompletionInterval) clearInterval(checkCompletionInterval);
+    // Print out it's name to the terminal
+    console.log("New Image Name: " + newImg);
 
-    checkCompletionInterval = setInterval(sendImgToClients, 500, newImg);
-  } 
+    // If we have an interval going, cancel it
+    if (checkCompletionInterval) clearInterval(checkCompletionInterval);
+    
+    // Send the image out to all of the clients in 500 ms
+      checkCompletionInterval = setInterval(sendImgToClients, 500, newImg);
+
+    // Add it to the list of displayed images
+    images.push(newImg);
+  }
 });
 
-app.get('/', function(req, res) {
-      console.log("Somebody has hit the server here!");
-      fs.readFile(__dirname + '/livePhoto.html', 'utf8', function(err, text){
-       res.send(text);
-   });
-})
-
-
-// Figure out what the new file was
-function findNewImageName() {
-	var newImgName;
-
-	var files = fs.readdirSync('public/images');
-
-	for (var i = 0; i < files.length; i++) {
-		if (images.indexOf(files[i]) == -1  && files[i].indexOf('.DS') == -1) {
-			newImgName = files[i];
-			break;
-		} 
-	}
-
-	return newImgName;
-}
-
-function logExistingImages() {
-  var files = fs.readdirSync('public/images');
-
-  for (var i = 0; i < files.length; i++) {
-    images.push(files[i]);
-  }
-
-}
-
+/*
+Send the image to each client web socket
+*/
 function sendImgToClients(newImg) {
-  for (var i = 0; i < sockets.length; i++) {
-       sockets[i].emit('newImage', {newImage : "/images/" + newImg});
-    }
-    images.push(newImg);
 
+  // For each open socket
+    for (var i = 0; i < sockets.length; i++) {
+
+      // Send the message to the socket
+        sockets[i].emit('newImage', {newImage : "/images/" + newImg});
+    }
+
+    // Clear the completion interval
     clearInterval(checkCompletionInterval);
 }
 
-// When we get a connection from the browser
+/*
+* If we get a request to our root route, send the html page back
+*/
+app.get('/', function(req, res) {
+
+  // Read the html file into a text buffer
+    fs.readFile(__dirname + '/public/livePhoto.html', 'utf8', function(err, text){
+
+      // Send out the buffer
+      res.send(text);
+   });
+})
+
+/*
+* Create new socket connections
+* and handle teardowns
+*/
 io.sockets.on('connection', function (socket) {
 
   // If there is a socket
@@ -76,11 +99,57 @@ io.sockets.on('connection', function (socket) {
     sockets.push(socket);
   }
 
+  // When a socket disconnects
   socket.on('disconnect', function () {
+
+    // Remove that socket from our array
     delete sockets[socket];
   });
 });
 
+/*
+Scan the array of images until we
+find one we haven't accounted for yet.
+*/
+function findNewImageName() {
+
+  // Grab the list if images in the directory
+  var files = fs.readdirSync('public/images');
+
+  // Iterate through the images
+  for (var i = 0; i < files.length; i++) {
+
+    // If the image name isn't in our array of account for images
+    // it's the new one, so return it.
+    if (images.indexOf(files[i]) == -1  && files[i].indexOf('.DS') == -1) {
+      return files[i];
+    } 
+  }
+}
+
+/* 
+Add the pre-existing images
+to our image array so that
+we don't confuse it with a new one. 
+*/
+function logExistingImages() {
+
+  // Grab all the current images
+    var files = fs.readdirSync('public/images');
+
+    // For each file in teh directory
+    for (var i = 0; i < files.length; i++) {
+
+      // Add it to the array
+      images.push(files[i]);
+    }
+}
+
+// Catalog all existing images
 logExistingImages();
+
+// Start the server on port 8080
 server.listen(8080);
+
+//Write out the port just for fun
 console.log("listening on port 8080");
